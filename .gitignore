@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+project.xcworkspace/
+
+# Swift Package Manager
+.build/
+
+# Carthage
+Carthage/Build/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# SPM Dependencies
+Packages/
+
+# Compiled Swift
+*.swiftdoc
+*.swiftmodule
+*.swiftdoc
