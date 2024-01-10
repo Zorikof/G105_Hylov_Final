@@ -10,7 +10,7 @@ class ViewController: UIViewController {
     var isSearching = false
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // Commit on GH Test
         DataManager.shared.clearTopItemsInRealm()
         Requests.shared.fetchAndSaveTopMovies(completion: updateUI)
         Requests.shared.fetchAndSaveTopTvShows(completion: updateUI)
