@@ -1,5 +1,6 @@
 import UIKit
 import RealmSwift
+import SDWebImage
 
 class ViewController: UIViewController {
     
@@ -8,16 +9,19 @@ class ViewController: UIViewController {
     @IBOutlet weak var topSegmentedControl: UISegmentedControl!
     
     var isSearching = false
+    let baseURL = "https://image.tmdb.org/t/p/original"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // Commit on GH Test
         DataManager.shared.clearTopItemsInRealm()
         Requests.shared.fetchAndSaveTopMovies(completion: updateUI)
         Requests.shared.fetchAndSaveTopTvShows(completion: updateUI)
-        setTabBarIcons()
+        setTabBarSrttings()
+        self.topSegmentedControl.backgroundColor = UIColor(red: 222/255, green: 197/255, blue: 141/255, alpha: 0.5)
         
         topSegmentedControl.addTarget(self, action: #selector(segmentedControlChanged(_:)), for: .valueChanged)
-        centralTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        centralTableView.register(UINib(nibName: "ItemCellTableViewCell", bundle: nil), forCellReuseIdentifier: "ItemCellTableViewCell")
         updateUI()
     }
 }
@@ -27,38 +31,56 @@ class ViewController: UIViewController {
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let moviesCount: Int
+        let tvShowsCount: Int
+
+        if isSearching {
+            moviesCount = DataManager.shared.getSearchedMovies().count
+            tvShowsCount = DataManager.shared.getSearchedTvShows().count
+        } else {
+            moviesCount = DataManager.shared.getTopMovies().count
+            tvShowsCount = DataManager.shared.getTopTvShows().count
+        }
+
         switch topSegmentedControl.selectedSegmentIndex {
         case 0:
-            if isSearching {
-                return DataManager.shared.getSearchedMovies().count
-            } else {
-                return DataManager.shared.getTopMovies().count
-            }
+            return moviesCount
         case 1:
-            if isSearching {
-                return DataManager.shared.getSearchedTvShows().count
-            } else {
-                return DataManager.shared.getTopTvShows().count
-            }
+            return tvShowsCount
         default:
             return 0
         }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.selectionStyle = .none
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
+        return 300
+    }
+
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCellTableViewCell", for: indexPath) as? ItemCellTableViewCell else {
+            return UITableViewCell()
+        }
+        cell.selectionStyle = .none
+        let imageURLString: String
+        let title: String
         if isSearching {
             switch topSegmentedControl.selectedSegmentIndex {
             case 0:
                 let movie = DataManager.shared.getSearchedMovies()[indexPath.row]
-                cell.textLabel?.text = movie.title
-                return cell
+                title = movie.title
+                imageURLString = baseURL + (movie.backdrop_path ?? "")
+                cell.cellNameLabel.text = title
+                let imageURL = URL(string: imageURLString)
+                cell.cellImageVIew.sd_setImage(with: imageURL)
             case 1:
                 let tvShow = DataManager.shared.getSearchedTvShows()[indexPath.row]
-                cell.textLabel?.text = tvShow.name
-                return cell
+                title = tvShow.name
+                imageURLString = baseURL + (tvShow.backdrop_path ?? "")
+                cell.cellNameLabel.text = title
+                let imageURL = URL(string: imageURLString)
+                cell.cellImageVIew.sd_setImage(with: imageURL)
             default:
                 return cell
             }
@@ -66,17 +88,25 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             switch topSegmentedControl.selectedSegmentIndex {
             case 0:
                 let movie = DataManager.shared.getTopMovies()[indexPath.row]
-                cell.textLabel?.text = movie.title
-                return cell
+                title = movie.title
+                imageURLString = baseURL + (movie.backdrop_path ?? "")
+                cell.cellNameLabel.text = title
+                let imageURL = URL(string: imageURLString)
+                cell.cellImageVIew.sd_setImage(with: imageURL)
             case 1:
                 let tvShow = DataManager.shared.getTopTvShows()[indexPath.row]
-                cell.textLabel?.text = tvShow.name
-                return cell
+                title = tvShow.name
+                imageURLString = baseURL + (tvShow.backdrop_path ?? "")
+                cell.cellNameLabel.text = title
+                let imageURL = URL(string: imageURLString)
+                cell.cellImageVIew.sd_setImage(with: imageURL)
             default:
                 return cell
             }
         }
+        return cell
     }
+
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let main = UIStoryboard(name: "Main", bundle: nil)
@@ -133,7 +163,9 @@ extension ViewController {
         centralTableView.reloadData()
     }
     
-    func setTabBarIcons() {
+    func setTabBarSrttings() {
+        self.tabBarController?.tabBar.backgroundColor = UIColor(red: 222/255, green: 197/255, blue: 141/255, alpha: 0.5)
+        
         if let firstTabBarItem = self.tabBarController?.tabBar.items?[0] {
             firstTabBarItem.image = UIImage(systemName: "film.fill")
         }

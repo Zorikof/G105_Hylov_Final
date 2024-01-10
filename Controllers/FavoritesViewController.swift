@@ -13,6 +13,8 @@ class FavoritesViewController: UIViewController {
         
         segmentedControl.addTarget(self, action: #selector(segmentedControlChanged(_:)), for: .valueChanged)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "FavoriteCell")
+        self.segmentedControl.backgroundColor = UIColor(red: 222/255, green: 197/255, blue: 141/255, alpha: 0.5)
+
     }
 }
 
